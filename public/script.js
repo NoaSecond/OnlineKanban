@@ -1,4 +1,112 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Système de Log et Gestion d'Erreurs ---
+    const Logger = {
+        levels: {
+            ERROR: { emoji: '🚨', color: '#ef4444', level: 0 },
+            WARN: { emoji: '⚠️', color: '#f97316', level: 1 },
+            INFO: { emoji: 'ℹ️', color: '#3b82f6', level: 2 },
+            SUCCESS: { emoji: '✅', color: '#22c55e', level: 3 },
+            DEBUG: { emoji: '🔍', color: '#8b5cf6', level: 4 }
+        },
+        
+        currentLevel: 4, // Afficher tous les logs en développement
+        
+        log(level, message, data = null) {
+            const logLevel = this.levels[level];
+            if (!logLevel || logLevel.level > this.currentLevel) return;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `${logLevel.emoji} [${timestamp}] ${message}`;
+            
+            console.log(
+                `%c${logMessage}`,
+                `color: ${logLevel.color}; font-weight: bold;`
+            );
+            
+            if (data) {
+                console.log('📊 Données associées:', data);
+            }
+        },
+        
+        error(message, error = null) {
+            this.log('ERROR', message, error);
+            if (error && error.stack) {
+                console.error('📋 Stack trace:', error.stack);
+            }
+        },
+        
+        warn(message, data = null) {
+            this.log('WARN', message, data);
+        },
+        
+        info(message, data = null) {
+            this.log('INFO', message, data);
+        },
+        
+        success(message, data = null) {
+            this.log('SUCCESS', message, data);
+        },
+        
+        debug(message, data = null) {
+            this.log('DEBUG', message, data);
+        }
+    };
+
+    // --- Gestionnaire d'Erreurs Global ---
+    const ErrorHandler = {
+        handle(error, context = 'Application') {
+            Logger.error(`Erreur dans ${context}`, error);
+            
+            // Afficher une notification à l'utilisateur si nécessaire
+            if (error.userFacing) {
+                this.showUserNotification(error.message, 'error');
+            }
+        },
+        
+        showUserNotification(message, type = 'info') {
+            // Créer une notification temporaire
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <span class="notification-icon">${type === 'error' ? '🚨' : type === 'success' ? '✅' : 'ℹ️'}</span>
+                <span class="notification-message">${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Supprimer après 5 secondes
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        },
+        
+        wrapAsync(fn, context) {
+            return async (...args) => {
+                try {
+                    return await fn(...args);
+                } catch (error) {
+                    this.handle(error, context);
+                    throw error;
+                }
+            };
+        },
+        
+        wrapSync(fn, context) {
+            return (...args) => {
+                try {
+                    return fn(...args);
+                } catch (error) {
+                    this.handle(error, context);
+                    throw error;
+                }
+            };
+        }
+    };
+
+    Logger.info('🚀 Application OnlineKanban démarrée');
+
     // --- Éléments du DOM ---
     const kanbanBoard = document.getElementById('kanban-board');
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
@@ -42,24 +150,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- État de l'application ---
     let boardData;
     try {
+        Logger.debug('🔄 Chargement des données depuis localStorage');
         const savedData = JSON.parse(localStorage.getItem('kanbanBoard'));
         if (savedData && savedData.workflows && Array.isArray(savedData.workflows)) {
             boardData = savedData;
+            Logger.success('📂 Données chargées avec succès', { workflows: savedData.workflows.length });
         } else {
+            Logger.warn('⚠️ Données invalides ou inexistantes, utilisation des données par défaut');
             boardData = getDefaultData();
+            Logger.info('🔄 Données par défaut chargées');
         }
     } catch (e) {
+        Logger.error('💥 Erreur lors du chargement des données', e);
         boardData = getDefaultData();
+        Logger.info('🔄 Données par défaut chargées');
     }
     
     // --- Fonctions ---
-    const saveData = () => localStorage.setItem('kanbanBoard', JSON.stringify(boardData));
+    const saveData = ErrorHandler.wrapSync(() => {
+        Logger.debug('💾 Sauvegarde des données');
+        localStorage.setItem('kanbanBoard', JSON.stringify(boardData));
+        Logger.success('✅ Données sauvegardées avec succès');
+    }, 'Sauvegarde des données');
 
-    const renderBoard = () => {
+    const renderBoard = ErrorHandler.wrapSync(() => {
+        Logger.debug('🎨 Rendu du tableau Kanban');
         kanbanBoard.innerHTML = '';
         if (!boardData.workflows || boardData.workflows.length === 0) {
+            Logger.info('📋 Aucune colonne à afficher');
             kanbanBoard.innerHTML = '<p style="text-align: center; width: 100%; opacity: 0.7;">Votre tableau est vide. Ajoutez une colonne pour commencer !</p>';
         } else {
+            Logger.debug('🏗️ Rendu des colonnes', { count: boardData.workflows.length });
             boardData.workflows.forEach(workflow => {
                 const columnEl = document.createElement('div');
                 columnEl.className = 'workflow-column';
@@ -94,9 +215,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 kanbanBoard.appendChild(columnEl);
             });
         }
+        Logger.success('✨ Tableau rendu avec succès');
         initDragAndDrop();
         saveData();
-    };
+    }, 'Rendu du tableau');
 
     const initDragAndDrop = () => {
         new Sortable(kanbanBoard, {
@@ -137,30 +259,64 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Logique CRUD ---
-    saveAddBtn.addEventListener('click', () => {
+    saveAddBtn.addEventListener('click', ErrorHandler.wrapSync(() => {
         const type = addModalType.value;
         const title = addModalInput.value.trim();
         if (title) {
             if (type === 'workflow') {
-                boardData.workflows.push({ id: Date.now(), title, color: `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`, tasks: [] });
+                const newWorkflow = { 
+                    id: Date.now(), 
+                    title, 
+                    color: `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`, 
+                    tasks: [] 
+                };
+                boardData.workflows.push(newWorkflow);
+                Logger.success('🆕 Nouvelle colonne créée', { id: newWorkflow.id, title, color: newWorkflow.color });
+                ErrorHandler.showUserNotification(`✅ Colonne "${title}" créée !`, 'success');
             } else {
                 const workflow = boardData.workflows.find(w => w.id == addModalWorkflowId.value);
-                if (workflow) workflow.tasks.push({ id: Date.now(), title, description: 'Cliquez pour éditer...', color: '#6b7280' });
+                if (workflow) {
+                    const newTask = { id: Date.now(), title, description: 'Cliquez pour éditer...', color: '#6b7280' };
+                    workflow.tasks.push(newTask);
+                    Logger.success('📝 Nouvelle tâche créée', { 
+                        taskId: newTask.id, 
+                        title, 
+                        workflowTitle: workflow.title 
+                    });
+                    ErrorHandler.showUserNotification(`✅ Tâche "${title}" créée !`, 'success');
+                } else {
+                    Logger.error('❌ Impossible de trouver la colonne pour ajouter la tâche');
+                }
             }
             renderBoard();
             closeModal(addModal);
+        } else {
+            Logger.warn('⚠️ Tentative d\'ajout avec titre vide');
+            ErrorHandler.showUserNotification('⚠️ Veuillez entrer un titre', 'error');
         }
-    });
+    }, 'Ajout d\'élément'));
 
-    workflowForm.saveBtn.addEventListener('click', () => {
+    workflowForm.saveBtn.addEventListener('click', ErrorHandler.wrapSync(() => {
         const workflow = boardData.workflows.find(w => w.id == workflowForm.id.value);
         if (workflow) {
+            const oldTitle = workflow.title;
+            const oldColor = workflow.color;
             workflow.title = workflowForm.title.value;
             workflow.color = workflowForm.color.value;
+            Logger.success('✏️ Colonne modifiée', { 
+                id: workflow.id,
+                oldTitle,
+                newTitle: workflow.title,
+                oldColor,
+                newColor: workflow.color
+            });
             renderBoard();
+            ErrorHandler.showUserNotification(`✅ Colonne "${workflow.title}" modifiée !`, 'success');
+        } else {
+            Logger.error('❌ Impossible de trouver la colonne à modifier');
         }
         closeModal(workflowModal);
-    });
+    }, 'Modification de colonne'));
 
     taskForm.saveBtn.addEventListener('click', () => {
         for (const workflow of boardData.workflows) {
@@ -239,13 +395,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    themeToggleBtn.addEventListener('click', () => {
+    themeToggleBtn.addEventListener('click', ErrorHandler.wrapSync(() => {
+        Logger.debug('🎨 Changement de thème');
         const isDark = document.body.classList.toggle('dark-mode');
         themeToggleBtn.textContent = isDark ? '☀️' : '🌙';
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    });
+        Logger.success(`✅ Thème changé vers ${isDark ? 'sombre' : 'clair'}`);
+    }, 'Changement de thème'));
 
-    exportBtn.addEventListener('click', () => {
+    exportBtn.addEventListener('click', ErrorHandler.wrapSync(() => {
+        Logger.info('📤 Début de l\'export des données');
         const dataStr = JSON.stringify(boardData, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -254,25 +413,46 @@ document.addEventListener('DOMContentLoaded', () => {
         a.download = 'mon-kanban.kanban';
         a.click();
         URL.revokeObjectURL(url);
-    });
+        Logger.success('📦 Export terminé avec succès', { 
+            workflows: boardData.workflows.length,
+            totalTasks: boardData.workflows.reduce((sum, w) => sum + w.tasks.length, 0)
+        });
+        ErrorHandler.showUserNotification('📦 Tableau exporté avec succès !', 'success');
+    }, 'Export des données'));
 
-    importInput.addEventListener('change', (e) => {
+    importInput.addEventListener('change', ErrorHandler.wrapSync((e) => {
         const file = e.target.files[0];
         if (file && file.name.endsWith('.kanban')) {
+            Logger.info('📥 Début de l\'import des données', { fileName: file.name });
             const reader = new FileReader();
-            reader.onload = (event) => {
+            reader.onload = ErrorHandler.wrapSync((event) => {
                 try {
                     const importedData = JSON.parse(event.target.result);
                     if (importedData.workflows && Array.isArray(importedData.workflows)) {
+                        const oldWorkflowsCount = boardData.workflows.length;
                         boardData = importedData;
                         renderBoard();
-                    } else { throw new Error('Format de fichier invalide.'); }
-                } catch (error) { alert(`Erreur: ${error.message}`); }
-            };
+                        Logger.success('📋 Import terminé avec succès', { 
+                            oldWorkflows: oldWorkflowsCount,
+                            newWorkflows: boardData.workflows.length,
+                            totalTasks: boardData.workflows.reduce((sum, w) => sum + w.tasks.length, 0)
+                        });
+                        ErrorHandler.showUserNotification('📋 Tableau importé avec succès !', 'success');
+                    } else { 
+                        throw new Error('Format de fichier invalide.'); 
+                    }
+                } catch (error) { 
+                    Logger.error('💥 Erreur lors de l\'import', error);
+                    ErrorHandler.showUserNotification(`❌ Erreur: ${error.message}`, 'error');
+                }
+            }, 'Lecture du fichier d\'import');
             reader.readAsText(file);
-        } else { alert('Veuillez sélectionner un fichier .kanban valide.'); }
+        } else { 
+            Logger.warn('⚠️ Fichier invalide sélectionné', { fileName: file?.name });
+            ErrorHandler.showUserNotification('⚠️ Veuillez sélectionner un fichier .kanban valide.', 'error');
+        }
         e.target.value = ''; // Permet de réimporter le même fichier
-    });
+    }, 'Import des données'));
 
     [addModal, taskModal, workflowModal].forEach(modal => {
         modal.addEventListener('click', (e) => {
@@ -289,6 +469,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
         themeToggleBtn.textContent = '☀️';
+        Logger.debug('🌙 Thème sombre appliqué');
     }
+    
+    // Rendu initial et finalisation de l'initialisation
     renderBoard();
+    Logger.success('🎉 Application OnlineKanban initialisée avec succès !');
 });
