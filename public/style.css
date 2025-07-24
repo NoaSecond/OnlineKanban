@@ -26,6 +26,9 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     transition: background-color 0.3s, color 0.3s;
 }
 
@@ -46,68 +49,6 @@ header h1 {
     font-size: 1.25rem;
 }
 
-button {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border-color);
-    background-color: var(--card-bg);
-    color: var(--text-color);
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-button:hover {
-    background-color: var(--border-color);
-}
-
-/* --- Variables & Thèmes --- */
-:root {
-    --bg-color: #f4f7f6;
-    --text-color: #333;
-    --header-bg: #ffffff;
-    --border-color: #e0e0e0;
-    --card-bg: #ffffff;
-    --accent-color: #007bff;
-    --primary-color: #1a73e8;
-    --danger-color: #ef4444;
-    --shadow-color: rgba(0, 0, 0, 0.05);
-}
-
-body.dark-mode {
-    --bg-color: #121212;
-    --text-color: #f1f1f1;
-    --header-bg: #1e1e1e;
-    --border-color: #333;
-    --card-bg: #1e1e1e;
-    --shadow-color: rgba(0, 0, 0, 0.2);
-}
-
-/* --- Styles de Base --- */
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    background-color: var(--header-bg);
-    border-bottom: 1px solid var(--border-color);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-header h1 { margin: 0; font-size: 1.25rem; }
-
 button, .io-btn {
     padding: 0.5rem 1rem;
     border: 1px solid var(--border-color);
@@ -116,9 +57,20 @@ button, .io-btn {
     border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
+    font-family: inherit;
+    font-size: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+    vertical-align: middle;
+    line-height: 1;
     transition: all 0.2s ease;
 }
-button:hover { background-color: var(--border-color); }
+
+button:hover, .io-btn:hover { background-color: var(--border-color); }
 
 /* --- Kanban Board --- */
 main { flex-grow: 1; }
@@ -147,6 +99,8 @@ main { flex-grow: 1; }
     padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--border-color);
     cursor: move;
+    border-radius: 12px 12px 0 0;
+    transition: border-left-color 0.3s ease;
 }
 .workflow-header h3 { margin: 0; }
 
@@ -210,9 +164,14 @@ main { flex-grow: 1; }
 
 /* --- Boutons IO & Actions --- */
 .io-btn, .action-btn {
-    background-color: var(--primary-color); color: white; border: none;
+    background-color: var(--primary-color); 
+    color: white; 
+    border-color: var(--primary-color);
 }
-.io-btn:hover, .action-btn:hover { background-color: #155ab0; }
+.io-btn:hover, .action-btn:hover { 
+    background-color: #155ab0; 
+    border-color: #155ab0;
+}
 .danger-btn { background-color: var(--danger-color); }
 .danger-btn:hover { background-color: #c0392b; }
 

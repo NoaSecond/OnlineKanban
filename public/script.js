@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 columnEl.dataset.workflowId = workflow.id;
 
                 columnEl.innerHTML = `
-                    <div class="workflow-header">
+                    <div class="workflow-header" style="border-left: 4px solid ${workflow.color || '#1a73e8'}">
                         <h3>${workflow.title}</h3>
                         <div class="workflow-actions">
                             <button class="workflow-menu-btn" title="Options de la colonne">
