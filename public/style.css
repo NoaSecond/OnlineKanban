@@ -159,6 +159,7 @@ main { flex-grow: 1; }
 }
 .footer-left { display: flex; align-items: center; gap: 0.5rem; }
 .footer-left a { color: var(--accent-color); text-decoration: none; font-weight: 500; }
+.footer-left a.author-link { color: inherit; font-weight: inherit; }
 .footer-left span { font-size: 0.9em; opacity: 0.8; }
 .footer-right.io-buttons { display: flex; gap: 1rem; }
 
