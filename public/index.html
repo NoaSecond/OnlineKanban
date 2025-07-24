@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Kanban</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="/images/icon.png">
+</head>
+<body>
+    <header>
+        <h1>Online Kanban</h1>
+        <div class="controls">
+            <button id="add-workflow-btn">➕ Ajouter Colonne</button>
+            <button id="theme-toggle-btn">🌙</button>
+        </div>
+    </header>
+
+    <main id="kanban-board">
+        </main>
+    
+    <div class="io-buttons">
+        <label for="import-input" class="io-btn">Importer (.kanban)</label>
+        <input type="file" id="import-input" accept=".kanban" style="display: none;">
+        <button id="export-btn" class="io-btn">Exporter (.kanban)</button>
+    </div>
+
+    <footer>
+        <p>
+            <a href="https://github.com/VotrePseudo/OnlineKanban" target="_blank">Projet sur GitHub</a>
+        </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+/* Conserver les variables de thème :root et body.dark-mode */
+:root {
+    --bg-color: #f4f7f6;
+    --text-color: #111;
+    --header-bg: #ffffff;
+    --border-color: #ddd;
+    --card-bg: #ffffff;
+    --accent-color: #007bff;
+}
+
+body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #f1f1f1;
+    --header-bg: #1e1e1e;
+    --border-color: #333;
+    --card-bg: #1e1e1e;
+}
+/* ... (styles de base) */
+
+#kanban-board {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    overflow-x: auto;
+    min-height: 80vh;
+}
+
+.workflow-column {
+    flex: 0 0 300px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.workflow-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-left: 8px;
+}
+
+.task-list {
+    min-height: 100px;
+}
+
+.task-card {
+    background-color: var(--bg-color);
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    cursor: grab;
+    border: 1px solid var(--border-color);
+}
