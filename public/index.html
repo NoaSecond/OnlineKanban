@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Kanban</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="/images/icon.png">
 </head>
 <body>
     <header>
@@ -17,20 +16,67 @@
         </div>
     </header>
 
-    <main id="kanban-board">
-        </main>
+    <main id="kanban-board"></main>
+
+    <footer id="app-footer">
+        <div class="footer-left">
+            <a href="https://github.com/NoaSecond/OnlineKanban" target="_blank" rel="noopener noreferrer">Projet sur GitHub</a>
+            <span>- Créé par Noa Second</span>
+        </div>
+        <div class="io-buttons footer-right">
+            <label for="import-input" class="io-btn">Importer (.kanban)</label>
+            <input type="file" id="import-input" accept=".kanban" style="display: none;">
+            <button id="export-btn" class="io-btn">Exporter (.kanban)</button>
+        </div>
+    </footer>
+
+    <div id="add-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h2 id="add-modal-title"></h2>
+            <input type="hidden" id="add-modal-type">
+            <input type="hidden" id="add-modal-workflow-id">
+            <label for="add-modal-input">Titre</label>
+            <input type="text" id="add-modal-input" placeholder="Nouveau titre...">
+            <div class="modal-actions">
+                <button id="save-add-btn" class="action-btn">Ajouter</button>
+            </div>
+        </div>
+    </div>
     
-    <div class="io-buttons">
-        <label for="import-input" class="io-btn">Importer (.kanban)</label>
-        <input type="file" id="import-input" accept=".kanban" style="display: none;">
-        <button id="export-btn" class="io-btn">Exporter (.kanban)</button>
+    <div id="task-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h2 id="modal-title">Éditer la Tâche</h2>
+            <input type="hidden" id="task-id-input">
+            <label for="task-title-input">Titre</label>
+            <input type="text" id="task-title-input" placeholder="Titre de la tâche">
+            <label for="task-desc-input">Description</label>
+            <textarea id="task-desc-input" rows="4" placeholder="Description..."></textarea>
+            <label for="task-color-input">Couleur</label>
+            <input type="color" id="task-color-input">
+            <div class="modal-actions">
+                <button id="delete-task-btn" class="danger-btn">Supprimer</button>
+                <button id="save-task-btn" class="action-btn">Sauvegarder</button>
+            </div>
+        </div>
     </div>
 
-    <footer>
-        <p>
-            <a href="https://github.com/VotrePseudo/OnlineKanban" target="_blank">Projet sur GitHub</a>
-        </p>
-    </footer>
+    <div id="workflow-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h2>Éditer la Colonne</h2>
+            <input type="hidden" id="workflow-id-input">
+            <label for="workflow-title-input">Titre</label>
+            <input type="text" id="workflow-title-input" placeholder="Titre de la colonne">
+            <label for="workflow-color-input">Couleur</label>
+            <input type="color" id="workflow-color-input">
+            <div class="modal-actions">
+                <button id="delete-workflow-btn" class="danger-btn">Supprimer</button>
+                <button id="save-workflow-btn" class="action-btn">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="script.js"></script>
