@@ -507,34 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = e.target.files[0];
         if (file && file.name.endsWith('.kanban')) {
             Logger.info('📥 Début de l\'import des données', { fileName: file.name });
-            const reader = new FileReader();
-            reader.onload = ErrorHandler.wrapSync((event) => {
-                try {
-                    const importedData = JSON.parse(event.target.result);
-                    if (importedData.workflows && Array.isArray(importedData.workflows)) {
-                        const oldWorkflowsCount = boardData.workflows.length;
-                        boardData = importedData;
-                        // Assurer la compatibilité avec les anciens fichiers sans nom de projet
-                        if (!boardData.projectName) {
-                            boardData.projectName = 'Online Kanban';
-                        }
-                        updateProjectTitle();
-                        renderBoard();
-                        Logger.success('📋 Import terminé avec succès', { 
-                            oldWorkflows: oldWorkflowsCount,
-                            newWorkflows: boardData.workflows.length,
-                            totalTasks: boardData.workflows.reduce((sum, w) => sum + w.tasks.length, 0)
-                        });
-                        ErrorHandler.showUserNotification('📋 Tableau importé avec succès !', 'success');
-                    } else { 
-                        throw new Error('Format de fichier invalide.'); 
-                    }
-                } catch (error) { 
-                    Logger.error('💥 Erreur lors de l\'import', error);
-                    ErrorHandler.showUserNotification(`❌ Erreur: ${error.message}`, 'error');
-                }
-            }, 'Lecture du fichier d\'import');
-            reader.readAsText(file);
+            processImportFile(file);
         } else { 
             Logger.warn('⚠️ Fichier invalide sélectionné', { fileName: file?.name });
             ErrorHandler.showUserNotification('⚠️ Veuillez sélectionner un fichier .kanban valide.', 'error');
@@ -551,6 +524,83 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     addModalInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') saveAddBtn.click() });
+
+    // --- Drag and Drop pour Import ---
+    let dragCounter = 0;
+
+    const handleDragEnter = (e) => {
+        e.preventDefault();
+        dragCounter++;
+        document.body.classList.add('drag-over');
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        dragCounter--;
+        if (dragCounter === 0) {
+            document.body.classList.remove('drag-over');
+        }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    const handleDrop = ErrorHandler.wrapSync((e) => {
+        e.preventDefault();
+        dragCounter = 0;
+        document.body.classList.remove('drag-over');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.name.endsWith('.kanban')) {
+                Logger.info('📥 Import par drag & drop', { fileName: file.name });
+                processImportFile(file);
+            } else {
+                Logger.warn('⚠️ Fichier non supporté glissé', { fileName: file.name });
+                ErrorHandler.showUserNotification('⚠️ Seuls les fichiers .kanban sont supportés', 'error');
+            }
+        }
+    }, 'Drag and Drop');
+
+    const processImportFile = (file) => {
+        const reader = new FileReader();
+        reader.onload = ErrorHandler.wrapSync((event) => {
+            try {
+                const importedData = JSON.parse(event.target.result);
+                if (importedData.workflows && Array.isArray(importedData.workflows)) {
+                    const oldWorkflowsCount = boardData.workflows.length;
+                    boardData = importedData;
+                    // Assurer la compatibilité avec les anciens fichiers sans nom de projet
+                    if (!boardData.projectName) {
+                        boardData.projectName = 'Online Kanban';
+                    }
+                    updateProjectTitle();
+                    renderBoard();
+                    Logger.success('📋 Import terminé avec succès', { 
+                        method: 'drag-drop',
+                        oldWorkflows: oldWorkflowsCount,
+                        newWorkflows: boardData.workflows.length,
+                        totalTasks: boardData.workflows.reduce((sum, w) => sum + w.tasks.length, 0)
+                    });
+                    ErrorHandler.showUserNotification('📋 Tableau importé avec succès !', 'success');
+                } else { 
+                    throw new Error('Format de fichier invalide.'); 
+                }
+            } catch (error) { 
+                Logger.error('💥 Erreur lors de l\'import', error);
+                ErrorHandler.showUserNotification(`❌ Erreur: ${error.message}`, 'error');
+            }
+        }, 'Lecture du fichier d\'import par drag & drop');
+        reader.readAsText(file);
+    };
+
+    // Événements drag and drop sur le document
+    document.addEventListener('dragenter', handleDragEnter);
+    document.addEventListener('dragleave', handleDragLeave);
+    document.addEventListener('dragover', handleDragOver);
+    document.addEventListener('drop', handleDrop);
 
     // --- Initialisation ---
     const savedTheme = localStorage.getItem('theme');

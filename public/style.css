@@ -285,6 +285,39 @@ main { flex-grow: 1; }
     }
 }
 
+/* --- Drag and Drop Import --- */
+.drag-over {
+    position: relative;
+}
+
+.drag-over::before {
+    content: "📋 Glissez votre fichier .kanban ici pour l'importer";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(26, 115, 232, 0.9);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    z-index: 10000;
+    pointer-events: none;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
 /* --- Responsive Design --- */
 
 /* Tablettes et petits écrans (768px et moins) */
