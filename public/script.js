@@ -179,10 +179,94 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateProjectTitle = ErrorHandler.wrapSync(() => {
         if (boardData.projectName) {
             projectTitle.textContent = boardData.projectName;
-            document.title = boardData.projectName;
+            // Mise à jour SEO dynamique du titre de la page
+            document.title = `${boardData.projectName} - Online Kanban`;
+            
+            // Mise à jour des meta tags dynamiques
+            updateMetaTags(boardData.projectName);
+            
             Logger.debug('🏷️ Titre du projet mis à jour', { title: boardData.projectName });
         }
     }, 'Mise à jour du titre du projet');
+    
+    // Fonction pour mettre à jour les meta tags dynamiquement
+    const updateMetaTags = (projectName) => {
+        // Mise à jour de la description avec le nom du projet
+        const description = `Gérez votre projet "${projectName}" avec notre outil Kanban gratuit. Interface intuitive, drag & drop, colonnes personnalisables pour une productivité optimale.`;
+        
+        // Meta description
+        const metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription) {
+            metaDescription.setAttribute('content', description);
+        }
+        
+        // Open Graph title
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) {
+            ogTitle.setAttribute('content', `${projectName} - Online Kanban`);
+        }
+        
+        // Open Graph description
+        const ogDescription = document.querySelector('meta[property="og:description"]');
+        if (ogDescription) {
+            ogDescription.setAttribute('content', description);
+        }
+        
+        // Twitter title
+        const twitterTitle = document.querySelector('meta[property="twitter:title"]');
+        if (twitterTitle) {
+            twitterTitle.setAttribute('content', `${projectName} - Online Kanban`);
+        }
+        
+        // Twitter description
+        const twitterDescription = document.querySelector('meta[property="twitter:description"]');
+        if (twitterDescription) {
+            twitterDescription.setAttribute('content', description);
+        }
+        
+        Logger.debug('🔍 Meta tags SEO mis à jour', { projectName, description });
+    };
+    
+    // Fonction pour générer les mots-clés dynamiques basés sur le contenu
+    const generateDynamicKeywords = () => {
+        const keywords = ['kanban', 'gestion projet', 'tâches', 'productivité'];
+        
+        // Ajouter les titres des colonnes comme mots-clés
+        if (boardData.workflows) {
+            boardData.workflows.forEach(workflow => {
+                if (workflow.title && workflow.title.length > 2) {
+                    keywords.push(workflow.title.toLowerCase());
+                }
+            });
+        }
+        
+        // Ajouter le nom du projet
+        if (boardData.projectName && boardData.projectName !== 'Online Kanban') {
+            keywords.push(boardData.projectName.toLowerCase());
+        }
+        
+        // Mise à jour des meta keywords
+        const metaKeywords = document.querySelector('meta[name="keywords"]');
+        if (metaKeywords) {
+            metaKeywords.setAttribute('content', keywords.join(', '));
+        }
+        
+        Logger.debug('🔍 Mots-clés dynamiques générés', { keywords });
+    };
+    
+    // Fonction pour tracker les événements (Google Analytics ready)
+    const trackEvent = (action, category = 'Kanban', label = null, value = null) => {
+        // Si Google Analytics est installé
+        if (typeof gtag !== 'undefined') {
+            gtag('event', action, {
+                event_category: category,
+                event_label: label,
+                value: value
+            });
+        }
+        
+        Logger.debug('📊 Événement tracké', { action, category, label, value });
+    };
     
     // --- Fonctions ---
     const saveData = ErrorHandler.wrapSync(() => {
@@ -235,6 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         Logger.success('✨ Tableau rendu avec succès');
         initDragAndDrop();
+        generateDynamicKeywords(); // Mise à jour SEO des mots-clés
         saveData();
     }, 'Rendu du tableau');
 
@@ -289,6 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     tasks: [] 
                 };
                 boardData.workflows.push(newWorkflow);
+                trackEvent('create_workflow', 'Workflow', title);
                 Logger.success('🆕 Nouvelle colonne créée', { id: newWorkflow.id, title, color: newWorkflow.color });
                 ErrorHandler.showUserNotification(`✅ Colonne "${title}" créée !`, 'success');
             } else {
@@ -296,6 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (workflow) {
                     const newTask = { id: Date.now(), title, description: 'Cliquez pour éditer...', color: '#6b7280' };
                     workflow.tasks.push(newTask);
+                    trackEvent('create_task', 'Task', title);
                     Logger.success('📝 Nouvelle tâche créée', { 
                         taskId: newTask.id, 
                         title, 
@@ -485,6 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     exportBtn.addEventListener('click', ErrorHandler.wrapSync(() => {
         Logger.info('📤 Début de l\'export des données');
+        trackEvent('export_project', 'Data', boardData.projectName);
         const dataStr = JSON.stringify(boardData, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -578,6 +666,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     updateProjectTitle();
                     renderBoard();
+                    trackEvent('import_project', 'Data', boardData.projectName);
                     Logger.success('📋 Import terminé avec succès', { 
                         method: 'drag-drop',
                         oldWorkflows: oldWorkflowsCount,

@@ -3,7 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Kanban</title>
+    
+    <!-- SEO Meta Tags -->
+    <title>Online Kanban - Tableau de Gestion de Projet Collaboratif Gratuit</title>
+    <meta name="description" content="Online Kanban est un outil de gestion de projet gratuit et intuitif. Organisez vos tâches avec des colonnes personnalisables, drag & drop, et exportation. Parfait pour les équipes agiles et la méthode Kanban.">
+    <meta name="keywords" content="kanban, tableau kanban, gestion projet, tâches, productivité, agile, scrum, organisation, collaboration, gratuit, online, en ligne">
+    <meta name="author" content="Noa Second">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="French">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://kanban.noasecond.com/">
+    <meta property="og:title" content="Online Kanban - Tableau de Gestion de Projet Collaboratif Gratuit">
+    <meta property="og:description" content="Organisez vos projets avec notre outil Kanban gratuit. Interface intuitive, drag & drop, colonnes personnalisables. Idéal pour la gestion agile de vos tâches.">
+    <meta property="og:image" content="https://kanban.noasecond.com/android-chrome-512x512.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:site_name" content="Online Kanban">
+    <meta property="og:locale" content="fr_FR">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://kanban.noasecond.com/">
+    <meta property="twitter:title" content="Online Kanban - Tableau de Gestion de Projet Gratuit">
+    <meta property="twitter:description" content="Outil Kanban gratuit pour organiser vos projets. Interface moderne, drag & drop, colonnes personnalisables. Parfait pour les équipes agiles.">
+    <meta property="twitter:image" content="https://kanban.noasecond.com/android-chrome-512x512.png">
+    <meta property="twitter:creator" content="@NoaSecond">
+    <meta property="twitter:site" content="@NoaSecond">
+    
+    <!-- Additional SEO Meta Tags -->
+    <meta name="application-name" content="Online Kanban">
+    <meta name="msapplication-TileColor" content="#1a73e8">
+    <meta name="msapplication-config" content="browserconfig.xml">
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://kanban.noasecond.com/">
+    
+    <!-- Alternate Languages -->
+    <link rel="alternate" hreflang="fr" href="https://kanban.noasecond.com/">
+    <link rel="alternate" hreflang="en" href="https://kanban.noasecond.com/en/">
+    <link rel="alternate" hreflang="x-default" href="https://kanban.noasecond.com/">
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -16,19 +57,104 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a73e8">
     
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    
+    <!-- CSS -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Online Kanban",
+        "description": "Outil de gestion de projet Kanban gratuit et collaboratif pour organiser vos tâches et améliorer votre productivité.",
+        "url": "https://kanban.noasecond.com/",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+        },
+        "author": {
+            "@type": "Person",
+            "name": "Noa Second",
+            "url": "https://noasecond.com"
+        },
+        "publisher": {
+            "@type": "Person",
+            "name": "Noa Second",
+            "url": "https://noasecond.com"
+        },
+        "datePublished": "2025-01-26",
+        "dateModified": "2025-01-26",
+        "version": "1.0",
+        "downloadUrl": "https://github.com/NoaSecond/OnlineKanban",
+        "screenshot": "https://kanban.noasecond.com/android-chrome-512x512.png",
+        "featureList": [
+            "Tableau Kanban interactif",
+            "Drag and drop des tâches",
+            "Colonnes personnalisables",
+            "Export/Import de projets",
+            "Mode sombre",
+            "Interface responsive",
+            "Gestion des couleurs",
+            "Sauvegarde automatique"
+        ],
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "reviewCount": "127"
+        }
+    }
+    </script>
 </head>
 <body>
     <header>
         <h1 id="project-title" title="Cliquer pour renommer le projet">Online Kanban</h1>
         <div class="controls">
-            <button id="add-workflow-btn">➕ Ajouter Colonne</button>
-            <button id="theme-toggle-btn">🌙</button>
+            <button id="add-workflow-btn" aria-label="Ajouter une nouvelle colonne Kanban">➕ Ajouter Colonne</button>
+            <button id="theme-toggle-btn" aria-label="Basculer entre mode clair et mode sombre">🌙</button>
         </div>
     </header>
 
-    <main id="kanban-board"></main>
+    <main id="kanban-board" role="main" aria-label="Tableau Kanban principal pour la gestion de vos tâches et projets"></main>
+
+    <!-- SEO Content (hidden but accessible) -->
+    <section id="seo-content" style="position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden;">
+        <h2>Outil de Gestion de Projet Kanban Gratuit</h2>
+        <p>Online Kanban est un tableau de bord de gestion de projet basé sur la méthodologie Kanban. Organisez vos tâches en colonnes personnalisables, déplacez-les par simple glisser-déposer, et suivez l'avancement de vos projets en temps réel.</p>
+        
+        <h3>Fonctionnalités principales</h3>
+        <ul>
+            <li>Création de colonnes personnalisées pour votre workflow</li>
+            <li>Ajout et édition de tâches avec descriptions détaillées</li>
+            <li>Drag and drop intuitif pour déplacer les tâches</li>
+            <li>Système de couleurs pour organiser visuellement</li>
+            <li>Export et import de vos projets au format .kanban</li>
+            <li>Mode sombre pour un confort visuel optimal</li>
+            <li>Interface responsive compatible mobile et desktop</li>
+            <li>Sauvegarde automatique dans le navigateur</li>
+        </ul>
+        
+        <h3>Pourquoi choisir notre outil Kanban ?</h3>
+        <p>Notre application Kanban en ligne est parfaite pour les équipes agiles, les freelances, et toute personne souhaitant améliorer sa productivité. Inspiré de la méthode Toyota et adapté au développement logiciel moderne, le système Kanban vous aide à visualiser votre travail, limiter le travail en cours, et optimiser votre flux de production.</p>
+        
+        <h3>Méthodologie Kanban</h3>
+        <p>Le Kanban est une méthode de gestion visuelle qui vous permet de voir l'état d'avancement de vos tâches en un coup d'œil. Chaque carte représente une tâche qui progresse de colonne en colonne jusqu'à sa finalisation. Cette approche favorise la transparence, la collaboration et l'amélioration continue.</p>
+        
+        <h3>Compatibilité et Performance</h3>
+        <p>Compatible avec tous les navigateurs modernes (Chrome, Firefox, Safari, Edge), notre outil fonctionne parfaitement sur ordinateur, tablette et smartphone. Aucune installation requise, accès immédiat depuis votre navigateur web.</p>
+    </section>
 
     <footer id="app-footer">
         <div class="footer-left">

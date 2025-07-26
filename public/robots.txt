@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://kanban.noasecond.com/sitemap.xml
+
+# Performance optimization - Block crawling of assets
+User-agent: *
+Disallow: /style.css
+Disallow: /script.js
+Disallow: /*.png$
+Disallow: /*.ico$
+Disallow: /*.svg$
+
+# Allow important files for SEO
+Allow: /manifest.json
+Allow: /favicon.ico
+Allow: /android-chrome-*.png
+Allow: /apple-touch-icon.png
+
+# Crawl delay to be respectful
+Crawl-delay: 1
