@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://kanban.noasecond.com/sitemap.xml
+Sitemap: /sitemap.xml
 
 # Performance optimization - Block crawling of assets
 User-agent: *

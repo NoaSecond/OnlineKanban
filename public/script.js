@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
             DEBUG: { emoji: '🔍', color: '#8b5cf6', level: 4 }
         },
         
-        currentLevel: 4, // Afficher tous les logs en développement
+        // Niveau de log pour production (2 = INFO et moins)
+        currentLevel: window.location.hostname === 'localhost' ? 4 : 2,
         
         log(level, message, data = null) {
             const logLevel = this.levels[level];
@@ -191,6 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Fonction pour mettre à jour les meta tags dynamiquement
     const updateMetaTags = (projectName) => {
+        // Ne pas mettre à jour si le nom n'a pas changé
+        if (updateMetaTags.lastProjectName === projectName) return;
+        updateMetaTags.lastProjectName = projectName;
+        
         // Mise à jour de la description avec le nom du projet
         const description = `Gérez votre projet "${projectName}" avec notre outil Kanban gratuit. Interface intuitive, drag & drop, colonnes personnalisables pour une productivité optimale.`;
         
@@ -265,7 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        Logger.debug('📊 Événement tracké', { action, category, label, value });
+        // Log uniquement en développement
+        if (Logger.currentLevel >= 4) {
+            Logger.debug('📊 Événement tracké', { action, category, label, value });
+        }
     };
     
     // --- Fonctions ---
