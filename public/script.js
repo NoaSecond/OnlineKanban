@@ -118,6 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const addModalInput = document.getElementById('add-modal-input');
     const addModalType = document.getElementById('add-modal-type');
     const addModalWorkflowId = document.getElementById('add-modal-workflow-id');
+    const projectTitle = document.getElementById('project-title');
+    const projectModal = document.getElementById('project-modal');
+    const projectNameInput = document.getElementById('project-name-input');
+    const saveProjectBtn = document.getElementById('save-project-btn');
     const saveAddBtn = document.getElementById('save-add-btn');
     const taskModal = document.getElementById('task-modal');
     const taskForm = {
@@ -139,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Données par défaut ---
     const getDefaultData = () => ({
+        projectName: 'Online Kanban',
         workflows: [
             { id: Date.now() + 1, title: 'À faire', color: '#ef4444', tasks: [] },
             { id: Date.now() + 2, title: 'En cours', color: '#f97316', tasks: [] },
@@ -154,6 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedData = JSON.parse(localStorage.getItem('kanbanBoard'));
         if (savedData && savedData.workflows && Array.isArray(savedData.workflows)) {
             boardData = savedData;
+            // Assurer la compatibilité avec les anciens fichiers sans nom de projet
+            if (!boardData.projectName) {
+                boardData.projectName = 'Online Kanban';
+            }
             Logger.success('📂 Données chargées avec succès', { workflows: savedData.workflows.length });
         } else {
             Logger.warn('⚠️ Données invalides ou inexistantes, utilisation des données par défaut');
@@ -165,6 +174,15 @@ document.addEventListener('DOMContentLoaded', () => {
         boardData = getDefaultData();
         Logger.info('🔄 Données par défaut chargées');
     }
+    
+    // Mettre à jour le titre du projet
+    const updateProjectTitle = ErrorHandler.wrapSync(() => {
+        if (boardData.projectName) {
+            projectTitle.textContent = boardData.projectName;
+            document.title = boardData.projectName;
+            Logger.debug('🏷️ Titre du projet mis à jour', { title: boardData.projectName });
+        }
+    }, 'Mise à jour du titre du projet');
     
     // --- Fonctions ---
     const saveData = ErrorHandler.wrapSync(() => {
@@ -342,6 +360,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Gestionnaires d'Événements ---
     addWorkflowBtn.addEventListener('click', () => openAddModal('workflow'));
 
+    // Gestionnaire pour le titre du projet
+    projectTitle.addEventListener('click', ErrorHandler.wrapSync(() => {
+        Logger.info('✏️ Ouverture de la modale de renommage du projet');
+        projectNameInput.value = boardData.projectName || 'Online Kanban';
+        projectModal.classList.add('visible');
+        projectNameInput.focus();
+        projectNameInput.select();
+    }, 'Ouverture modale projet'));
+
+    saveProjectBtn.addEventListener('click', ErrorHandler.wrapSync(() => {
+        const newName = projectNameInput.value.trim();
+        if (newName) {
+            boardData.projectName = newName;
+            updateProjectTitle();
+            saveData();
+            projectModal.classList.remove('visible');
+            Logger.success('🏷️ Nom du projet modifié', { newName });
+            ErrorHandler.showUserNotification('📝 Nom du projet modifié avec succès !', 'success');
+        }
+    }, 'Sauvegarde nom du projet'));
+
+    projectNameInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') saveProjectBtn.click();
+        if (e.key === 'Escape') projectModal.classList.remove('visible');
+    });
+
     kanbanBoard.addEventListener('click', (e) => {
         const menuBtn = e.target.closest('.workflow-menu-btn');
         if (menuBtn) {
@@ -410,10 +454,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'mon-kanban.kanban';
+        // Utiliser le nom du projet pour le nom du fichier, avec fallback
+        const projectName = (boardData.projectName || 'Online Kanban').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        a.download = `${projectName}.kanban`;
         a.click();
         URL.revokeObjectURL(url);
         Logger.success('📦 Export terminé avec succès', { 
+            projectName: boardData.projectName,
             workflows: boardData.workflows.length,
             totalTasks: boardData.workflows.reduce((sum, w) => sum + w.tasks.length, 0)
         });
@@ -431,6 +478,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (importedData.workflows && Array.isArray(importedData.workflows)) {
                         const oldWorkflowsCount = boardData.workflows.length;
                         boardData = importedData;
+                        // Assurer la compatibilité avec les anciens fichiers sans nom de projet
+                        if (!boardData.projectName) {
+                            boardData.projectName = 'Online Kanban';
+                        }
+                        updateProjectTitle();
                         renderBoard();
                         Logger.success('📋 Import terminé avec succès', { 
                             oldWorkflows: oldWorkflowsCount,
@@ -454,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.value = ''; // Permet de réimporter le même fichier
     }, 'Import des données'));
 
-    [addModal, taskModal, workflowModal].forEach(modal => {
+    [addModal, taskModal, workflowModal, projectModal].forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal || e.target.classList.contains('modal-close-btn')) {
                 closeModal(modal);
@@ -473,6 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Rendu initial et finalisation de l'initialisation
+    updateProjectTitle();
     renderBoard();
     Logger.success('🎉 Application OnlineKanban initialisée avec succès !');
 });

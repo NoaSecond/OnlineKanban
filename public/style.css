@@ -50,6 +50,13 @@ header h1 {
     margin: 0;
     font-size: 1.25rem;
     flex-shrink: 0;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    user-select: none;
+}
+
+header h1:hover {
+    color: var(--primary-color);
 }
 
 .controls {
