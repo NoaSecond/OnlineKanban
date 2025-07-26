@@ -332,6 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ErrorHandler.showUserNotification(`✅ Colonne "${workflow.title}" modifiée !`, 'success');
         } else {
             Logger.error('❌ Impossible de trouver la colonne à modifier');
+            ErrorHandler.showUserNotification('❌ Erreur lors de la modification de la colonne', 'error');
         }
         closeModal(workflowModal);
     }, 'Modification de colonne'));
@@ -340,10 +341,18 @@ document.addEventListener('DOMContentLoaded', () => {
         for (const workflow of boardData.workflows) {
             const task = workflow.tasks.find(t => t.id == taskForm.id.value);
             if (task) {
+                const oldTitle = task.title;
                 task.title = taskForm.title.value;
                 task.description = taskForm.description.value;
                 task.color = taskForm.color.value;
+                Logger.success('✏️ Tâche modifiée', { 
+                    id: task.id,
+                    oldTitle,
+                    newTitle: task.title,
+                    workflowTitle: workflow.title
+                });
                 renderBoard();
+                ErrorHandler.showUserNotification(`✅ Tâche "${task.title}" modifiée !`, 'success');
                 break;
             }
         }
@@ -352,8 +361,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     taskForm.deleteBtn.addEventListener('click', () => {
         if (!confirm('Voulez-vous vraiment supprimer cette tâche ?')) return;
+        
+        // Trouver le titre de la tâche avant suppression pour la notification
+        let deletedTaskTitle = '';
+        for (const workflow of boardData.workflows) {
+            const task = workflow.tasks.find(t => t.id == taskForm.id.value);
+            if (task) {
+                deletedTaskTitle = task.title;
+                break;
+            }
+        }
+        
         boardData.workflows.forEach(w => { w.tasks = w.tasks.filter(t => t.id != taskForm.id.value) });
+        Logger.success('🗑️ Tâche supprimée', { title: deletedTaskTitle });
         renderBoard();
+        ErrorHandler.showUserNotification(`🗑️ Tâche "${deletedTaskTitle}" supprimée`, 'success');
         closeModal(taskModal);
     });
 
@@ -415,8 +437,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const deleteWorkflowBtn = e.target.closest('.delete-workflow-btn');
         if(deleteWorkflowBtn) {
             if (!confirm('Voulez-vous vraiment supprimer cette colonne et toutes ses tâches ?')) return;
+            
+            // Trouver le titre de la colonne avant suppression pour la notification
+            const deletedWorkflow = boardData.workflows.find(w => w.id == deleteWorkflowBtn.dataset.workflowId);
+            const deletedWorkflowTitle = deletedWorkflow ? deletedWorkflow.title : 'Colonne';
+            const deletedTasksCount = deletedWorkflow ? deletedWorkflow.tasks.length : 0;
+            
             boardData.workflows = boardData.workflows.filter(w => w.id != deleteWorkflowBtn.dataset.workflowId);
+            Logger.success('🗑️ Colonne supprimée', { 
+                title: deletedWorkflowTitle, 
+                tasksDeleted: deletedTasksCount 
+            });
             renderBoard();
+            ErrorHandler.showUserNotification(
+                `🗑️ Colonne "${deletedWorkflowTitle}" et ${deletedTasksCount} tâche(s) supprimée(s)`, 
+                'success'
+            );
         }
         
         const taskCard = e.target.closest('.task-card');
