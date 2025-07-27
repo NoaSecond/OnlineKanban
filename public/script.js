@@ -334,7 +334,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const initDragAndDrop = () => {
         new Sortable(kanbanBoard, {
             group: 'columns', animation: 150, handle: '.workflow-header',
+            onStart: () => {
+                isDraggingInternal = true;
+            },
             onEnd: (evt) => {
+                isDraggingInternal = false;
                 const [movedItem] = boardData.workflows.splice(evt.oldIndex, 1);
                 boardData.workflows.splice(evt.newIndex, 0, movedItem);
                 renderBoard();
@@ -343,7 +347,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.task-list').forEach(list => {
             new Sortable(list, {
                 group: 'tasks', animation: 150,
+                onStart: () => {
+                    isDraggingInternal = true;
+                },
                 onEnd: (evt) => {
+                    isDraggingInternal = false;
                     const taskId = evt.item.dataset.taskId;
                     const oldWorkflow = boardData.workflows.find(w => w.id == evt.from.dataset.workflowId);
                     const taskIndex = oldWorkflow.tasks.findIndex(t => t.id == taskId);
@@ -623,14 +631,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Drag and Drop pour Import ---
     let dragCounter = 0;
+    let isDraggingInternal = false;
 
     const handleDragEnter = (e) => {
+        // Vérifier si on est en train de faire un drag interne
+        if (isDraggingInternal) {
+            return;
+        }
+        
         e.preventDefault();
         dragCounter++;
         document.body.classList.add('drag-over');
     };
 
     const handleDragLeave = (e) => {
+        // Vérifier si on est en train de faire un drag interne
+        if (isDraggingInternal) {
+            return;
+        }
+        
         e.preventDefault();
         dragCounter--;
         if (dragCounter === 0) {
@@ -639,10 +658,20 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleDragOver = (e) => {
+        // Vérifier si on est en train de faire un drag interne
+        if (isDraggingInternal) {
+            return;
+        }
+        
         e.preventDefault();
     };
 
     const handleDrop = ErrorHandler.wrapSync((e) => {
+        // Vérifier si on est en train de faire un drag interne
+        if (isDraggingInternal) {
+            return;
+        }
+        
         e.preventDefault();
         dragCounter = 0;
         document.body.classList.remove('drag-over');
